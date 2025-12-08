@@ -70,9 +70,12 @@ services:
       - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
       - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=redis
-      - QUEUE_HEALTH_CHECK_ACTIVE=true  # Required for the healthcheck to work
+      - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${SERVICE_PASSWORD_ENCRYPTION}
-      - N8N_CONCURRENCY_PRODUCTION_LIMIT=50
+      
+      # UPDATED: Use Env Variable (Default 50)
+      - N8N_CONCURRENCY_PRODUCTION_LIMIT=${N8N_CONCURRENCY_PRODUCTION_LIMIT:-50}
+      
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
       - N8N_RUNNERS_ENABLED=true
@@ -87,13 +90,12 @@ services:
         condition: service_healthy
       postgresql:
         condition: service_healthy
-    # ADDED: Health Check for Worker
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:5678/healthz || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: 15s
+      timeout: 30s
+      retries: 10
+      start_period: 60s
 
   # ----------------------------------------
   # 3. n8n Worker #2
@@ -114,7 +116,10 @@ services:
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - N8N_ENCRYPTION_KEY=${SERVICE_PASSWORD_ENCRYPTION}
-      - N8N_CONCURRENCY_PRODUCTION_LIMIT=50
+      
+      # UPDATED: Use Env Variable (Default 50)
+      - N8N_CONCURRENCY_PRODUCTION_LIMIT=${N8N_CONCURRENCY_PRODUCTION_LIMIT:-50}
+      
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
       - N8N_RUNNERS_ENABLED=true
@@ -129,13 +134,12 @@ services:
         condition: service_healthy
       postgresql:
         condition: service_healthy
-    # ADDED: Health Check for Worker 2
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:5678/healthz || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: 15s
+      timeout: 30s
+      retries: 10
+      start_period: 60s
 
   # ----------------------------------------
   # 4. Redis
