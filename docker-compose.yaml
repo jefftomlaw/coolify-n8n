@@ -26,12 +26,14 @@ services:
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       
+      # FIX: Offload Manual Executions (Fixes Deprecation Warning)
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+      
       # Security & Settings
       - N8N_ENCRYPTION_KEY=${SERVICE_PASSWORD_ENCRYPTION}
       - N8N_Block_ENV_ACCESS_IN_NODE=${N8N_BLOCK_ENV_ACCESS_IN_NODE:-true}
-      
-      # FIX: Enforce Permissions to remove warning
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
       
       # Timezone
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
@@ -72,10 +74,8 @@ services:
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
       - N8N_RUNNERS_ENABLED=true
-      
-      # FIX: Enforce Permissions
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
-      
+      - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
     volumes:
       - n8n-data:/home/node/.n8n
     depends_on:
@@ -108,10 +108,8 @@ services:
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
       - N8N_RUNNERS_ENABLED=true
-      
-      # FIX: Enforce Permissions
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
-      
+      - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
     volumes:
       - n8n-data:/home/node/.n8n
     depends_on:
@@ -123,12 +121,11 @@ services:
         condition: service_healthy
 
   # ----------------------------------------
-  # 4. Redis (Fixed - Removed sysctls)
+  # 4. Redis
   # ----------------------------------------
   redis:
     image: redis:6-alpine
     restart: always
-    # REMOVED: sysctls block was here. Do not add it back.
     volumes:
       - redis-data:/data
     healthcheck:
