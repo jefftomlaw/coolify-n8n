@@ -30,6 +30,9 @@ services:
       - N8N_ENCRYPTION_KEY=${SERVICE_PASSWORD_ENCRYPTION}
       - N8N_Block_ENV_ACCESS_IN_NODE=${N8N_BLOCK_ENV_ACCESS_IN_NODE:-true}
       
+      # FIX: Enforce Permissions to remove warning
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      
       # Timezone
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
@@ -69,6 +72,10 @@ services:
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
       - N8N_RUNNERS_ENABLED=true
+      
+      # FIX: Enforce Permissions
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      
     volumes:
       - n8n-data:/home/node/.n8n
     depends_on:
@@ -80,7 +87,7 @@ services:
         condition: service_healthy
 
   # ----------------------------------------
-  # 3. n8n Worker #2 (Manual Scaling)
+  # 3. n8n Worker #2
   # ----------------------------------------
   n8n-worker-2:
     build: .
@@ -101,6 +108,10 @@ services:
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
       - N8N_RUNNERS_ENABLED=true
+      
+      # FIX: Enforce Permissions
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      
     volumes:
       - n8n-data:/home/node/.n8n
     depends_on:
