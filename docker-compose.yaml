@@ -123,13 +123,12 @@ services:
         condition: service_healthy
 
   # ----------------------------------------
-  # 4. Redis
+  # 4. Redis (Fixed - Removed sysctls)
   # ----------------------------------------
   redis:
     image: redis:6-alpine
     restart: always
-    sysctls:
-      - vm.overcommit_memory=1
+    # REMOVED: sysctls block was here. Do not add it back.
     volumes:
       - redis-data:/data
     healthcheck:
