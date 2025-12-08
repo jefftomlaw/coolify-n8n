@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # ----------------------------------------
-  # 1. n8n Main
+  # 1. n8n Main (Editor & Webhooks)
   # ----------------------------------------
   n8n:
     build: .
@@ -13,7 +13,7 @@ services:
       - WEBHOOK_URL=${SERVICE_URL_N8N}
       - N8N_HOST=${SERVICE_URL_N8N}
       
-      # Database
+      # Database Connection
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgresql
       - DB_POSTGRESDB_PORT=5432
@@ -21,18 +21,22 @@ services:
       - DB_POSTGRESDB_USER=${POSTGRES_USER:-n8n}
       - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
       
-      # Queue Mode (No Password)
+      # Queue Mode Configuration (No Password for Internal Stability)
       - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_BULL_REDIS_PORT=6379
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       
-      # Misc Settings
+      # Performance & Scaling
       - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+      
+      # Security & Settings
       - N8N_ENCRYPTION_KEY=${SERVICE_PASSWORD_ENCRYPTION}
       - N8N_Block_ENV_ACCESS_IN_NODE=${N8N_BLOCK_ENV_ACCESS_IN_NODE:-true}
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
+      
+      # Timezone
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
       - N8N_RUNNERS_ENABLED=true
@@ -44,6 +48,7 @@ services:
         condition: service_healthy
       postgresql:
         condition: service_healthy
+    # Relaxed Health Check (Prevents restarts during heavy load)
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://127.0.0.1:5678/healthz || exit 1"]
       interval: 10s
@@ -52,7 +57,7 @@ services:
       start_period: 60s
 
   # ----------------------------------------
-  # 2. n8n Worker #1
+  # 2. n8n Worker #1 (High Performance)
   # ----------------------------------------
   n8n-worker:
     build: .
@@ -72,7 +77,10 @@ services:
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       
       - N8N_ENCRYPTION_KEY=${SERVICE_PASSWORD_ENCRYPTION}
+      
+      # Concurrency Control (Defaults to 50 if variable not set)
       - N8N_CONCURRENCY_PRODUCTION_LIMIT=${N8N_CONCURRENCY_PRODUCTION_LIMIT:-50}
+      
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Chicago}
       - TZ=${TZ:-America/Chicago}
       - N8N_RUNNERS_ENABLED=true
@@ -95,14 +103,14 @@ services:
       start_period: 60s
 
   # ----------------------------------------
-  # 3. n8n Worker #2
+  # 3. n8n Worker #2 (Double Throughput)
   # ----------------------------------------
   n8n-worker-2:
     build: .
     command: worker
     restart: always
     environment:
-      # Same config as Worker 1
+      # Exact same config as Worker 1
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgresql
       - DB_POSTGRESDB_PORT=5432
@@ -139,15 +147,14 @@ services:
       start_period: 60s
 
   # ----------------------------------------
-  # 4. Redis (No Password, Clean V5 Volume)
+  # 4. Redis (Standard)
   # ----------------------------------------
   redis:
     image: redis:6-alpine
     restart: always
-    # FIX: No command override, so no password required
+    command: redis-server --appendonly yes
     volumes:
-      # FIX: Rotated to V5 to ensure a clean, no-password DB
-      - redis-data-v5:/data
+      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -155,7 +162,7 @@ services:
       retries: 10
 
   # ----------------------------------------
-  # 5. PostgreSQL
+  # 5. PostgreSQL (Standard)
   # ----------------------------------------
   postgresql:
     image: postgres:16-alpine
@@ -166,7 +173,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-n8n}
       - TZ=America/Chicago
     volumes:
-      - postgres-data-v2:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h localhost -U n8n"]
       interval: 5s
@@ -176,5 +183,5 @@ services:
 
 volumes:
   n8n-data:
-  redis-data-v5:
-  postgres-data-v2:
+  redis-data:
+  postgres-data:
