@@ -1,47 +1,40 @@
-# 1. Use the 'next' tag to match your Beta Worker
+# 1. Use 'next' to match your Beta Worker (v2.0 Protocol)
 FROM n8nio/runners:next
 
 USER root
 
-# 2. Install System Dependencies (Runtime)
-# We strictly separate build-deps (deleted later) from runtime-deps (kept)
+# 2. Install System Dependencies
+# - tesseract-ocr: Required for OCR
+# - poppler-utils: Required for pdf2image
+# - build-base/python3-dev: Required if any pip packages need compiling
 RUN apk add --no-cache \
-    python3 \
-    py3-pip \
     tesseract-ocr \
     tesseract-ocr-data-eng \
     poppler-utils \
-    cairo \
-    pango \
-    libjpeg-turbo \
-    libpng \
-    giflib \
-    zlib
-
-# 3. Install Build Dependencies (Compilers)
-RUN apk add --no-cache --virtual .build-deps \
-    build-base \
-    gcc \
-    python3-dev \
     jpeg-dev \
     zlib-dev \
-    cairo-dev \
-    pango-dev \
-    giflib-dev
+    build-base \
+    python3-dev
 
-# 4. Install Python Libraries (Global Install)
-# We use --break-system-packages to ensure they are available to the system python
-RUN pip3 install --no-cache-dir --break-system-packages \
-    pytesseract \
-    pdf2image \
-    Pillow \
-    markitdown
+# 3. Install JavaScript Packages (Nodes)
+# We cd into the JS runner directory so pnpm updates the correct package.json
+RUN cd /opt/runners/task-runner-javascript \
+    && pnpm add \
+       pdf-lib \
+       pdf-img-convert \
+       pdf-parse
 
-# 5. Clean up Build Deps to keep image small
-RUN apk del .build-deps
+# 4. Install Python Libraries (Code Node)
+# We cd into the Python runner directory so 'uv' updates the correct venv
+RUN cd /opt/runners/task-runner-python \
+    && uv pip install \
+       pytesseract \
+       pdf2image \
+       Pillow
 
-# 6. Setup Runner User Permissions
+# 5. Fix Permissions
+# Crucial because we installed everything as root
 RUN chown -R runner:runner /opt/runners
 
-# 7. Switch User
+# 6. Switch back to restricted user
 USER runner
