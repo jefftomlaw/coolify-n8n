@@ -1,4 +1,4 @@
-FROM n8nio/runners:latest
+FROM n8nio/runners:beta
 
 USER root
 
