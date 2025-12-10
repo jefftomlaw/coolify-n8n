@@ -48,7 +48,7 @@ services:
     restart: always
     environment:
       # REQUIRED: Must match the token in your main n8n instance
-      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_AUTH_TOKEN=${RUNNER_AUTH_TOKEN}
       
       # OPTION A (Best): Use the coolify network DNS
       # Replace 'n8n' with the actual container name of your main n8n instance
