@@ -1,12 +1,10 @@
-# 1. Use 'next' to match your Beta Worker (v2.0 Protocol)
-FROM n8nio/runners:stable
+# 1. Use n8nio/runners as base (Source: [2])
+FROM n8nio/runners:latest
 
+# 2. Switch to root to install dependencies (Source: [2])
 USER root
 
-# 2. Install System Dependencies
-# - tesseract-ocr: Required for OCR
-# - poppler-utils: Required for pdf2image
-# - build-base/python3-dev: Required if any pip packages need compiling
+# 3. Install System Dependencies (OCR, etc.) (Source: [2])
 RUN apk add --no-cache \
     tesseract-ocr \
     tesseract-ocr-data-eng \
@@ -16,25 +14,27 @@ RUN apk add --no-cache \
     build-base \
     python3-dev
 
-# 3. Install JavaScript Packages (Nodes)
+# 4. Install JavaScript Packages (Source: [3])
 # We cd into the JS runner directory so pnpm updates the correct package.json
 RUN cd /opt/runners/task-runner-javascript \
     && pnpm add \
-       pdf-lib \
-       pdf-img-convert \
-       pdf-parse
+    pdf-lib \
+    pdf-img-convert \
+    pdf-parse
 
-# 4. Install Python Libraries (Code Node)
+# 5. Install Python Libraries (Source: [3])
 # We cd into the Python runner directory so 'uv' updates the correct venv
 RUN cd /opt/runners/task-runner-python \
     && uv pip install \
-       pytesseract \
-       pdf2image \
-       Pillow
+    pytesseract \
+    pdf2image \
+    Pillow
 
-# 5. Fix Permissions
-# Crucial because we installed everything as root
+# 6. Copy the configuration file to allowlist the packages (Source: [4])
+COPY n8n-task-runners.json /etc/n8n-task-runners.json
+
+# 7. Fix Permissions (Source: [3])
 RUN chown -R runner:runner /opt/runners
 
-# 6. Switch back to restricted user
+# 8. Switch back to restricted user (Source: [3])
 USER runner
