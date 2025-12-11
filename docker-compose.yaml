@@ -60,7 +60,7 @@ services:
       # OPTION A (Best): Use the coolify network DNS
       # Replace 'n8n' with the actual container name of your main n8n instance
       # Note: Scheme must be 'http', not 'ws'
-      - N8N_RUNNERS_TASK_BROKER_URI=ws://n8n-worker:5679
+      - N8N_RUNNERS_TASK_BROKER_URI=http://n8n-worker:5679
       
       # OPTION B: Use the Host Gateway IP (if DNS fails)
       # - N8N_RUNNERS_TASK_BROKER_URI=http://172.17.0.1:5679
