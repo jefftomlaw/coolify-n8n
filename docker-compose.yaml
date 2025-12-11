@@ -72,10 +72,10 @@ services:
     depends_on:
       -  n8n-worker
     healthcheck:
-      test: ["CMD-SHELL", "wget --spider --quiet http://127.0.0.1:5680/healthz || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5681/health && curl -f http://localhost:5682/health || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 5
       start_period: 10s
 volumes:
-  n8n-data: null
+  n8n_worker_data: null
