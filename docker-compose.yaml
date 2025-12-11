@@ -67,7 +67,7 @@ services:
     volumes:
       - ./js-task-runner-config.json:/etc/n8n-task-runners.json
     ports:
-      - "5682:5680"
+      - "5682:5682"
     depends_on:
       -  n8n-worker
     healthcheck:
@@ -91,7 +91,7 @@ services:
     volumes:
       - ./python-task-runner-config.json:/etc/n8n-task-runners.json
     ports:
-      - "5681:5680"
+      - "5681:5681"
     depends_on:
       -  n8n-worker
     healthcheck:
