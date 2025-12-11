@@ -32,7 +32,7 @@ services:
       - 'N8N_RUNNERS_AUTH_TOKEN=${RUNNER_AUTH_TOKEN}'
  
       # Additional Settings
-      - N8N_LOG_LEVEL=debug
+      - 'N8N_LOG_LEVEL=${N8N_LOG_LEVEL:-info}'
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
       - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
@@ -83,7 +83,7 @@ services:
     environment:      
       - 'N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI:-http://n8n-worker:5679}'
       - N8N_RUNNERS_AUTH_TOKEN=${RUNNER_AUTH_TOKEN}
-      - N8N_LOG_LEVEL=debug
+      - 'N8N_LOG_LEVEL=${N8N_LOG_LEVEL:-info}'
     volumes:
       - ./python-task-runner-config.json:/etc/n8n-task-runners.json
     ports:
