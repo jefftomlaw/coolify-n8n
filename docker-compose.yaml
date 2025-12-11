@@ -58,7 +58,8 @@ services:
       context: .
       dockerfile: Dockerfile.js
     restart: always
-    environment:      
+    environment:
+      - N8N_RUNNERS_RUNNER_TYPE=javascript
       - 'N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI:-http://n8n-worker:5679}'
       - N8N_RUNNERS_AUTH_TOKEN=${RUNNER_AUTH_TOKEN}
       - N8N_LOG_LEVEL=debug
@@ -81,6 +82,7 @@ services:
       dockerfile: Dockerfile.python
     restart: always
     environment:      
+      - N8N_RUNNERS_RUNNER_TYPE=python
       - 'N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI:-http://n8n-worker:5679}'
       - N8N_RUNNERS_AUTH_TOKEN=${RUNNER_AUTH_TOKEN}
       - 'N8N_LOG_LEVEL=${N8N_LOG_LEVEL:-info}'
