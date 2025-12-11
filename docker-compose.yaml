@@ -56,8 +56,10 @@ services:
       retries: 10
       start_period: 60s
   runner-js:
-    build: .
-    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.js  # Points to the JS-specific file
+   restart: always
     environment:      
       # Connect to worker's Task Broker since executions run on worker in queue mode
       - 'N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI:-http://n8n-worker:5679}'
@@ -69,18 +71,20 @@ services:
     volumes:
       - ./js-task-runner-config.json:/etc/n8n-task-runners.json
     ports:
-      - "5680:5680"
+      - "5681:5680"
     depends_on:
       -  n8n-worker
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5680/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5681/health || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 5
       start_period: 10s
   runner-python:
-    build: .
-    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.python # Points to the Python-specific file
+   restart: always
     environment:      
       # Connect to worker's Task Broker since executions run on worker in queue mode
       - 'N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI:-http://n8n-worker:5679}'
@@ -92,11 +96,11 @@ services:
     volumes:
       - ./python-task-runner-config.json:/etc/n8n-task-runners.json
     ports:
-      - "5680:5680"
+      - "5682:5680"
     depends_on:
       -  n8n-worker
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5681/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5682/health || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 5
