@@ -6,7 +6,17 @@ FROM n8nio/runners:beta
 # 2. Switch to root to install dependencies
 USER root
 
-# 3. Install JavaScript Packages
+# 3. Install System Dependencies required for 'canvas'
+# 'canvas' is a dependency of 'pdf-img-convert' and needs these libraries to build
+RUN apk add --no-cache \
+    build-base \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev
+
+# 4. Install JavaScript Packages
 # We delete pnpm-lock.yaml first to avoid "Cannot find resolution" errors
 RUN cd /opt/runners/task-runner-javascript \
     && rm -f pnpm-lock.yaml \
@@ -15,8 +25,8 @@ RUN cd /opt/runners/task-runner-javascript \
     pdf-img-convert \
     pdf-parse
 
-# 4. Fix Permissions
+# 5. Fix Permissions
 RUN chown -R runner:runner /opt/runners
 
-# 5. Switch back to restricted user
+# 6. Switch back to restricted user
 USER runner
