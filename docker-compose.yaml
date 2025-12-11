@@ -6,11 +6,11 @@ services:
     command: worker
     restart: always
     environment:
-      #Standard Worker Config
+      # Standard Worker Config
       - 'N8N_ENCRYPTION_KEY=${SERVICE_PASSWORD_ENCRYPTION}'
       - EXECUTIONS_MODE=queue
       
-      #Redis connections settings
+      # Redis connections settings
       - 'QUEUE_BULL_REDIS_HOST=${REDIS_HOST}'
       - 'QUEUE_BULL_REDIS_PORT=${REDIS_PORT:-6379}'
       - 'QUEUE_BULL_REDIS_USERNAME=${REDIS_USER}'
@@ -32,9 +32,6 @@ services:
       - 'N8N_RUNNERS_AUTH_TOKEN=${RUNNER_AUTH_TOKEN}'
  
       # Additional Settings
-      #- 'N8N_CONCURRENCY_PRODUCTION_LIMIT=${N8N_CONCURRENCY_PRODUCTION_LIMIT:-50}'
-      
-      #Additional Settings
       - N8N_LOG_LEVEL=debug
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
       - N8N_GIT_NODE_DISABLE_BARE_REPOS=true
@@ -55,18 +52,15 @@ services:
       timeout: 30s
       retries: 10
       start_period: 60s
+
   runner-js:
     build:
       context: .
-      dockerfile: Dockerfile.js  # Points to the JS-specific file
+      dockerfile: Dockerfile.js
     restart: always
     environment:      
-      # Connect to worker's Task Broker since executions run on worker in queue mode
       - 'N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI:-http://n8n-worker:5679}'
       - N8N_RUNNERS_AUTH_TOKEN=${RUNNER_AUTH_TOKEN}
-      #- N8N_RUNNERS_MAX_CONCURRENCY=${N8N_RUNNERS_MAX_CONCURRENCY:-5}
-      #- N8N_RUNNERS_ALLOW_IMPORT=${N8N_RUNNERS_ALLOW_IMPORT:-pytesseract,pdf2image,PIL}
-      #- N8N_RUNNERS_ALLOW_IMPORT_STDLIB=${N8N_RUNNERS_ALLOW_IMPORT_STDLIB:-*}
       - N8N_LOG_LEVEL=debug
     volumes:
       - ./js-task-runner-config.json:/etc/n8n-task-runners.json
@@ -80,18 +74,15 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+
   runner-python:
     build:
       context: .
-      dockerfile: Dockerfile.python # Points to the Python-specific file
+      dockerfile: Dockerfile.python
     restart: always
     environment:      
-      # Connect to worker's Task Broker since executions run on worker in queue mode
       - 'N8N_RUNNERS_TASK_BROKER_URI=${N8N_RUNNERS_TASK_BROKER_URI:-http://n8n-worker:5679}'
       - N8N_RUNNERS_AUTH_TOKEN=${RUNNER_AUTH_TOKEN}
-      #- N8N_RUNNERS_MAX_CONCURRENCY=${N8N_RUNNERS_MAX_CONCURRENCY:-5}
-      #- N8N_RUNNERS_ALLOW_IMPORT=${N8N_RUNNERS_ALLOW_IMPORT:-pytesseract,pdf2image,PIL}
-      #- N8N_RUNNERS_ALLOW_IMPORT_STDLIB=${N8N_RUNNERS_ALLOW_IMPORT_STDLIB:-*}
       - N8N_LOG_LEVEL=debug
     volumes:
       - ./python-task-runner-config.json:/etc/n8n-task-runners.json
@@ -105,5 +96,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+
 volumes:
   n8n_worker_data: null
