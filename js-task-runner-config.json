@@ -2,6 +2,7 @@
   "task-runners": [
     {
       "runner-type": "javascript",
+      "dir": "/opt/runners/task-runner-javascript",
       "health-check-server-port": "5682",
       "env-overrides": {
         "NODE_OPTIONS": "--enable-source-maps",
