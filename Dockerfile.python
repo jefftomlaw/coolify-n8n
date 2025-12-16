@@ -3,20 +3,22 @@
 # 1. Use n8nio/runners as base
 FROM n8nio/runners:beta
 
-# 2. Switch to root to install system dependencies [1]
+# 2. Switch to root to install system dependencies
 USER root
 
-# 3. Install System Dependencies (Required for OCR and Image processing) [1]
-RUN apk add --no-cache \
+# 3. Install System Dependencies (Debian/Ubuntu version)
+# 'apt-get' replaces 'apk'. We also clean up lists to keep the layer small.
+RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
-    tesseract-ocr-data-eng \
+    tesseract-ocr-eng \
     poppler-utils \
-    jpeg-dev \
-    zlib-dev \
-    build-base \
-    python3-dev
+    libjpeg-dev \
+    zlib1g-dev \
+    build-essential \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# 4. Install Python Libraries [2]
+# 4. Install Python Libraries
 # We cd into the Python runner directory so 'uv' updates the correct venv
 RUN cd /opt/runners/task-runner-python \
     && uv pip install \
@@ -24,8 +26,8 @@ RUN cd /opt/runners/task-runner-python \
     pdf2image \
     Pillow
 
-# 5. Fix Permissions [2]
+# 5. Fix Permissions
 RUN chown -R runner:runner /opt/runners
 
-# 6. Switch back to restricted user [3]
+# 6. Switch back to restricted user
 USER runner
