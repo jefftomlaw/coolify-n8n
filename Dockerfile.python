@@ -1,33 +1,48 @@
 # Dockerfile.python
 
-# 1. Use n8nio/runners as base
-FROM n8nio/runners:beta
+# --------------------------------------------------------
+# 1. Source Stage: Grab artifacts from the official runner
+# --------------------------------------------------------
+# We use the generic tag so Docker picks the right arch (x86 or ARM) for your Ubuntu server automatically.
+FROM n8nio/runners:beta AS source
 
-# 2. Switch to root to install system dependencies
-USER root
+# --------------------------------------------------------
+# 2. Build Stage: Use Alpine Linux (Matches n8n runner OS)
+# --------------------------------------------------------
+# We use python:3.11-alpine because n8n runners are built on Alpine/Wolfi.
+# This ensures the 'task-runner' binary works correctly.
+FROM python:3.11-alpine
 
-# 3. Install System Dependencies (Debian/Ubuntu version)
-# 'apt-get' replaces 'apk'. We also clean up lists to keep the layer small.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# 2a. Install System Dependencies
+# Now 'apk' works because we are on a full Alpine OS.
+RUN apk add --no-cache \
     tesseract-ocr \
-    tesseract-ocr-eng \
+    tesseract-ocr-data-eng \
     poppler-utils \
-    libjpeg-dev \
-    zlib1g-dev \
-    build-essential \
+    jpeg-dev \
+    zlib-dev \
+    build-base \
     python3-dev \
-    && rm -rf /var/lib/apt/lists/*
+    shadow
 
-# 4. Install Python Libraries
-# We cd into the Python runner directory so 'uv' updates the correct venv
-RUN cd /opt/runners/task-runner-python \
-    && uv pip install \
+# 2b. Setup the Runner User
+# n8n requires a user named 'runner' with UID 1000
+RUN adduser -D -u 1000 runner
+
+# 2c. Copy n8n Runner Artifacts
+# We copy the task runner binary and python environment from the official image
+COPY --from=source --chown=runner:runner /opt/runners /opt/runners
+
+# 2d. Install Python Libraries
+USER runner
+
+# We install your libraries into the EXISTING virtual environment from n8n.
+# We call the pip binary directly to avoid path issues.
+RUN /opt/runners/task-runner-python/.venv/bin/pip install \
     pytesseract \
     pdf2image \
     Pillow
 
-# 5. Fix Permissions
-RUN chown -R runner:runner /opt/runners
-
-# 6. Switch back to restricted user
-USER runner
+# 2e. Set Entrypoint
+# This points to the binary we copied from the source image.
+ENTRYPOINT ["/opt/runners/task-runner-python/bin/task-runner"]
