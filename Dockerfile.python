@@ -1,18 +1,17 @@
-# Use the official runner image as the base (Debian-based)
+# Use the official runner image as the base (Alpine-based)
 FROM n8nio/runners:beta
 
 USER root
 
-# Install system dependencies using apt-get
-RUN apt-get update && apt-get install -y \
+# Install system dependencies using apk
+RUN apk add --no-cache \
     tesseract-ocr \
-    libtesseract-dev \
+    tesseract-ocr-dev \
     poppler-utils \
-    libjpeg-dev \
-    zlib1g-dev \
-    build-essential \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
+    jpeg-dev \
+    zlib-dev \
+    build-base \
+    python3-dev
 
 # Install your Python libraries into the existing runner venv
 RUN /opt/runners/task-runner-python/.venv/bin/pip install --no-cache-dir \
