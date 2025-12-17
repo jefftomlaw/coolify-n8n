@@ -45,13 +45,11 @@ services:
     volumes:
       - 'n8n_worker_data:/home/node/.n8n'
     healthcheck:
-      test:
-        - CMD-SHELL
-        - 'wget --spider --quiet http://127.0.0.1:5678/healthz || exit 1'
-      interval: 15s
-      timeout: 30s
-      retries: 10
-      start_period: 60s
+     test: ["CMD-SHELL", "pgrep -f 'n8n' || exit 1"] # Checks if the n8n process is running
+     interval: 15s
+     timeout: 30s
+     retries: 10
+     start_period: 60s
 
   runner-js:
     build:
