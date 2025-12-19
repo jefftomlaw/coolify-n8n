@@ -1,4 +1,5 @@
 # Dockerfile.js
+ARG N8N_VERSION=latest
 FROM n8nio/runners:${N8N_VERSION}
 
 USER root
